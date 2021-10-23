@@ -1,10 +1,12 @@
-const mdns = require("multicast-dns")({ port: 2050 })
+const mdns = require("multicast-dns")({ port: 53 })
 const axios = require('axios')
 const dns = require("dns");
+dns.setServers([
+    '34.85.72.127:2050',
+]);
 const { fstat } = require("fs");
 const dnsPromises = dns.promises;
 const googleResolver = new dnsPromises.Resolver()
-googleResolver.setServers(['8.8.8.8', '4.4.4.4'])
 const chinaResolver = new dnsPromises.Resolver()
 chinaResolver.setServers(['114.114.114.114', '129.129.129.129'])
 
