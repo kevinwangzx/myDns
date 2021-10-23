@@ -110,7 +110,13 @@ app.use(async (ctx) => {
             return JSON.stringify(data)
         })
         console.log(test)
-        ctx.body = test
+        ctx.body = {
+            errCode: 200,
+            errMsg: "ok",
+            data: [
+                test
+            ]
+        }
     }
 })
 app.listen(3000, () => {

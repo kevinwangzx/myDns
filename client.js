@@ -44,20 +44,33 @@ mdns.on('query', function (query, rinfo) {
         re = new RegExp('' + question.name.split('.').join('\\.'), 'gi')
         if (chinaBlockedList.match(re)) {
 
-            console.log(" in blockList", question.name, question.type)
-            googleResolver.resolve(question.name, question.type).then(result => {
-                if (typeof result == "object") {
-                    result.forEach(r => answer.push({
-                        name: question.name,
-                        type: question.type,
-                        data: r
-                    }))
-                }
-                console.log("Question:", question, "Answer: ", answer)
-                mdns.respond({ id: query.id, answers: answer }, rinfo)
-            }).catch(error => {
-                console.log(error.message)
+            // console.log(" in blockList", question.name, question.type)
+            // googleResolver.resolve(question.name, question.type).then(result => {
+            //     if (typeof result == "object") {
+            //         result.forEach(r => answer.push({
+            //             name: question.name,
+            //             type: question.type,
+            //             data: r
+            //         }))
+            //     }
+            //     console.log("Question:", question, "Answer: ", answer)
+            //     mdns.respond({ id: query.id, answers: answer }, rinfo)
+            // }).catch(error => {
+            //     console.log(error.message)
+            // })
+
+            axios.post("http://34.85.72.127:3000/dns", {
+                id: query.id,
+                question: question,
+                rinfo: rinfo
             })
+                .then(function (response) {
+                    console.log("response: ");
+                    console.log(response);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
 
         } else {
             console.log("not in blockList", question)
