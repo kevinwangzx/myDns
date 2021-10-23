@@ -1,12 +1,12 @@
 const mdns = require("multicast-dns")({ port: 53 })
 const axios = require('axios')
 const dns = require("dns");
-dns.setServers([
-    '34.85.72.127:2050',
-]);
+
 const { fstat } = require("fs");
 const dnsPromises = dns.promises;
 const googleResolver = new dnsPromises.Resolver()
+
+console.log(googleResolver.getServers())
 const chinaResolver = new dnsPromises.Resolver()
 chinaResolver.setServers(['114.114.114.114', '129.129.129.129'])
 
@@ -43,6 +43,7 @@ mdns.on('query', function (query, rinfo) {
     if (question.name && typeof question.name === "string") {
         re = new RegExp('' + question.name.split('.').join('\\.'), 'gi')
         if (chinaBlockedList.match(re)) {
+
             console.log(" in blockList", question.name, question.type)
             googleResolver.resolve(question.name, question.type).then(result => {
                 if (typeof result == "object") {
@@ -52,6 +53,7 @@ mdns.on('query', function (query, rinfo) {
                         data: r
                     }))
                 }
+                console.log("Question:", question, "Answer: ", answer)
                 mdns.respond({ id: query.id, answers: answer }, rinfo)
             }).catch(error => {
                 console.log(error.message)
@@ -77,3 +79,4 @@ mdns.on('query', function (query, rinfo) {
     }
 })
 
+// axios.get()

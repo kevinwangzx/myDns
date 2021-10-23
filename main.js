@@ -1,5 +1,9 @@
 const mdns = require("multicast-dns")({ port: 2050 })
 const axios = require('axios')
+const Koa = require('koa')
+const app = new Koa()
+const bodyParser = require('koa-bodyparser')
+
 const dns = require("dns");
 const { fstat } = require("fs");
 const dnsPromises = dns.promises;
@@ -75,3 +79,40 @@ mdns.on('query', function (query, rinfo) {
     }
 })
 
+app.use(bodyParser())
+app.use(async (ctx) => {
+    console.log("Request ", ctx)
+    if (ctx.url == '/dns' && ctx.method == 'POST') {
+        let query = ctx.request.body
+
+        question = JSON.parse(query.question)
+        let answer = []
+        let test = await googleResolver.resolve(question.name, question.type).then(result => {
+            if (typeof result == "object") {
+                result.forEach(r => answer.push({
+                    name: question.name,
+                    type: question.type,
+                    data: r
+                }))
+            }
+            let data = {
+                answer: { id: query.id, answers: answer },
+                rinfo: query.rinfo
+            }
+            console.log(question, JSON.stringify(data))
+            return JSON.stringify(data)
+        }).catch(error => {
+            console.log(error.message)
+            let data = {
+                answer: { id: query.id, answers: [] },
+                rinfo: query.rinfo
+            }
+            return JSON.stringify(data)
+        })
+        console.log(test)
+        ctx.body = test
+    }
+})
+app.listen(3000, () => {
+    console.log('[demo] request post is starting at port 3000')
+})
